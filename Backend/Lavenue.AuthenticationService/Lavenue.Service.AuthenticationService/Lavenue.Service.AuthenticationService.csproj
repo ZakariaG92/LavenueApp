@@ -9,12 +9,20 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
+        <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Lavenue.Service\Lavenue.Service.Common\Lavenue.Service.Common.csproj" />
-      <ProjectReference Include="..\..\Lavenue.Service\Lavenue.Services.Entities\Lavenue.Services.Entities.csproj" />
+        <ProjectReference Include="..\..\Lavenue.Service\Lavenue.Service.Common\Lavenue.Service.Common.csproj" />
+        <ProjectReference Include="..\..\Lavenue.Service\Lavenue.Service.Infrastructure\Lavenue.Service.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\Lavenue.Service\Lavenue.Services.Entities\Lavenue.Services.Entities.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Lavenue.Services.Entities">
+            <HintPath>bin\Debug\net6.0\Lavenue.Services.Entities.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

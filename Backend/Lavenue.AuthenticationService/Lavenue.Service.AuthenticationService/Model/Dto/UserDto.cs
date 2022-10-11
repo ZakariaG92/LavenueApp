@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 
-
 namespace Lavenue.AuthenticationService.Model.Dto;
 
 public class UserDto

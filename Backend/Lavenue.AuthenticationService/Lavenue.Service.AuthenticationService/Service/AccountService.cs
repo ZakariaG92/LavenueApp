@@ -1,27 +1,25 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using Lavenue.AuthenticationService.Model;
 using Lavenue.AuthenticationService.Model.Dto;
 using Lavenue.AuthenticationService.Service.Interfaces;
 using Lavenue.Service.Common.Model;
-using Lavenue.Services.Entities.Model;
+using Lavenue.Service.Entities.Model;
+using Lavenue.Service.Infrastructure.Service.Interface;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Lavenue.AuthenticationService.Service;
 
 public class AccountService : IAccountService
 {
-
     private readonly IJwtSettings _jwtSettings;
+    private readonly IMongoDbRepository<User> _userDbRepository;
 
-    public AccountService( IJwtSettings jwtSettings)
+    public AccountService(IJwtSettings jwtSettings, IMongoDbRepository<User> userDbRepository)
     {
         _jwtSettings = jwtSettings;
+        _userDbRepository = userDbRepository;
     }
 
     public async Task<bool> SignUp(UserDto user, string connectionType = Auth0ConnectionTypes.Credentials)
@@ -35,12 +33,22 @@ public class AccountService : IAccountService
         // return response.IsSuccessStatusCode;
         return true;
     }
-    
+
     public JwToken? SignIn(User user)
     {
-       return GenerateToken(user);
+        return GenerateToken(user);
     }
 
+    public async Task<IEnumerable<User>> GetAllUsers()
+    {
+        var result = await _userDbRepository.GetAll();
+        return result;
+    }
+
+    public async Task InsertUser(User user)
+    {
+        await _userDbRepository.InsertUser(user);
+    }
 
     #region Private methods
 
@@ -54,27 +62,25 @@ public class AccountService : IAccountService
 
     private JwToken GenerateToken(User user)
     {
-        
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenKey = Encoding.UTF8.GetBytes(_jwtSettings.Key);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new Claim[]
+            Subject = new ClaimsIdentity(new[]
             {
-                new Claim(nameof(user.FirstName), user.FirstName),
+                new(nameof(user.FirstName), user.FirstName),
                 new Claim(nameof(user.LastName), user.LastName),
                 new Claim(nameof(user.Email), user.Email),
                 new Claim(nameof(user.Id), user.Id),
                 new Claim(nameof(user.PhoneNumber), user.PhoneNumber)
             }),
             Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey),SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey),
+                SecurityAlgorithms.HmacSha256Signature)
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return new JwToken { Token = tokenHandler.WriteToken(token)} ;
-        
+        return new JwToken { Token = tokenHandler.WriteToken(token) };
     }
 
     #endregion
-  
 }

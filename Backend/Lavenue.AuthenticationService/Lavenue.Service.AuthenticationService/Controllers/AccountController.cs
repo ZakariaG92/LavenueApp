@@ -1,7 +1,7 @@
 using Lavenue.AuthenticationService.Model;
 using Lavenue.AuthenticationService.Model.Dto;
 using Lavenue.AuthenticationService.Service.Interfaces;
-using Lavenue.Services.Entities.Model;
+using Lavenue.Service.Entities.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lavenue.AuthenticationService.Controllers;
@@ -15,6 +15,15 @@ public class AccountController : Controller
     public AccountController(IAccountService accountService)
     {
         _accountService = accountService;
+    }
+
+  
+    [Route("add-user")]
+    [HttpPost]
+    public async Task<IActionResult> AddUser(User user)
+    {
+        await _accountService.InsertUser(user);
+        return Ok();
     }
 
     [Route("signup")]
@@ -33,6 +42,7 @@ public class AccountController : Controller
         var created = await _accountService.SignUp(user);
         return created ? Ok() : BadRequest();
     }
+
 
     [Route("SignIn")]
     [HttpPost]
